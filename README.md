@@ -11,7 +11,7 @@ Questa libreria  permette di integrare il  Single Sign-On di Cohesion2 in siti o
 Usando il package manager **composer** installare il pacchetto 'andreaval/Cohesion2PHPLibrary'
 oppure
 **manualmente** copiando la directory cohesion2 in un qualsiasi punto della cartella web dell’applicativo. Assicurarsi che la cartella contenga i seguenti file:
--	Cohesion2.class.php
+-	Cohesion2.php
 -	wsSecurity.php
 
 ## Abilitazione SSO
@@ -24,7 +24,7 @@ Per disabilitare, eventualmente il SSO, e forzare quindi sempre all’autenticaz
       $cohesion->auth();
 
 ### Esempio di utilizzo
-      require_once 'cohesion2/Cohesion2.class.php';
+      require_once 'cohesion2/Cohesion2.php';
       try{
           $cohesion=new Cohesion2;
           $cohesion->auth();

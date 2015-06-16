@@ -1,8 +1,8 @@
 <?php
 /**
- * Classe per la gestione del SSO tramite Cohesion2
- * 
- * @version 1.0.0 11/06/2014 18.37
+ * Classe per la gestione del SSO di Cohesion2
+ * @version 2.1.0 16/06/2015 11.14
+ * @license MIT License <http://opensource.org/licenses/MIT>
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
  */
 class Cohesion2{
@@ -23,16 +23,19 @@ class Cohesion2{
      * @var string
      */
     public $id_sso;
+    
     /**
      * ID sessione ASPNET
      * @var string
      */
     public $id_aspnet;
+    
     /**
      * Username utente autenticato in Cohesion
      * @var string
      */
     public $username;
+    
     /**
      * Profilo dell'utente come fornito da Cohesion. Valori forniti (alcuni non sempre valorizzati):
      * titolo, nome, cognome, sesso, login, codice_fiscale, telefono,
@@ -72,6 +75,7 @@ class Cohesion2{
      * 1 indica di mostrare l’autenticazione con Utente, Password e PIN
      * 2 indica di mostrare l’autenticazione con Smart Card
      * 3 indica di mostrare l’autenticazione di Dominio (valida solo per utenti interni alla rete regionale)
+     * @return void
      */
     public function setAuthRestriction($authRestriction){
     	if($authRestriction) $this->authRestriction = $authRestriction;
@@ -89,6 +93,7 @@ class Cohesion2{
      * Imposta il ceritificato per invocare il WS del SSO. (Opzionale)
      * @param string $certFilePath File .pem contenente il certificato
      * @param string $keyFilePath File .pem contenente la chiave privata
+     * @return void
      */
     public function setCertificate($certFilePath,$keyFilePath){
     	$this->cert_file = $certFilePath;
@@ -100,6 +105,7 @@ class Cohesion2{
      * sempre reindirizzato alla pagina di login senza controllare se esso 
      * risulta autenticato o meno tramite SSO
      * @param boolean $on
+     * @return void
      */
     public function useSSO($on=TRUE){
         $this->sso = $on;
@@ -107,6 +113,7 @@ class Cohesion2{
     
     /**
      * Autentica l'utente nel sistema
+     * @return void
      * @throws Exception Invocata eccezione in caso di errore
      */
     public function auth(){
@@ -123,6 +130,7 @@ class Cohesion2{
     
     /**
      * Chiude la sessione locale e quella del SSO
+     * @return void
      */
     public function logout(){
         if($this->isAuth()){
@@ -148,6 +156,7 @@ class Cohesion2{
     
     /**
      * Chiude la sessione locale lasciando aperta quella del SSO
+     * @return void
      */
     public function logoutLocal(){
         if($this->isAuth()){
@@ -258,7 +267,7 @@ class Cohesion2SOAP extends SoapClient{
         $objWSA->addReplyTo();
         $doc = $objWSA->getDoc();
         $objWSSE = new WSSESoap($doc);
-            /* Sign all headers to include signing the WS-Addressing headers */
+        /* Sign all headers to include signing the WS-Addressing headers */
         $objWSSE->signAllHeaders = TRUE;
         $objWSSE->addTimestamp(); //add Timestamp with no expiration timestamp
         //create new XMLSec Key using RSA SHA-1 and type is private key
