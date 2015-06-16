@@ -8,7 +8,7 @@ Questa libreria  permette di integrare il  Single Sign-On di Cohesion2 in siti o
 * Nel file php.ini  assicurarsi che il parametro allow_url_fopen sia impostato a On (se non si fa uso del certificato digitale)
 
 ## Installazione
-Usando il package manager **composer** installare il pacchetto 'andreaval/Cohesion2PHPLibrary'
+Usando il package manager [composer](https://getcomposer.org/) installare il pacchetto *andreaval/cohesion2-library*
 oppure
 **manualmente** copiando la directory cohesion2 in un qualsiasi punto della cartella web dell’applicativo. Assicurarsi che la cartella contenga i seguenti file:
 -	Cohesion2.php
