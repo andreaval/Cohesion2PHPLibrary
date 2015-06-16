@@ -1,5 +1,5 @@
 {
-    "name": "andreaval/cohesion2_library",
+    "name": "andreaval/cohesion2-library",
     "description": "Libreria per l'autenticazione al sistema di SSO Cohesion2 della Regione Marche",
     "type": "library",
     "keywords": ["php", "Cohesion2", "Regione Marche"],
