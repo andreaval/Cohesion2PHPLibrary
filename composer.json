@@ -1,0 +1,26 @@
+{
+    "name": "andreaval/cohesion2_library",
+    "description": "Libreria per l'autenticazione al sistema di SSO Cohesion2 della Regione Marche",
+    "type": "library",
+    "keywords": ["php", "Cohesion2", "Regione Marche"],
+    "homepage": "https://github.com/andreaval/Cohesion2PHPLibrary",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrea Vallorani",
+            "email": "andrea.vallorani@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/andreaval/Cohesion2PHPLibrary/issues",
+        "source": "https://github.com/andreaval/Cohesion2PHPLibrary"
+    },
+    "require": {
+        "php": ">=5.0.0"
+    },
+    "autoload": {
+        "classmap": [
+            "cohesion2/Cohesion2.php"
+        ]
+    }
+}
