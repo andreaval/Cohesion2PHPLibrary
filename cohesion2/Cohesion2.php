@@ -1,15 +1,15 @@
 <?php
 /**
  * Classe per la gestione del SSO di Cohesion2
- * @version 2.1.0 16/06/2015 11.14
+ * @version 2.1.1 31/07/2015 16.48
  * @license MIT License <http://opensource.org/licenses/MIT>
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
  */
 class Cohesion2{
     
-    const COHESION2_CHECK = 'http://cohesion2.regione.marche.it/sso/Check.aspx?auth=';
-    const COHESION2_LOGIN = 'http://cohesion2.regione.marche.it/SA/LoginFrame.aspx?auth=';
-    const COHESION2_WS = 'http://cohesion2.regione.marche.it/sso/WsCheckSessionSSO.asmx';
+    const COHESION2_CHECK = 'https://cohesion2.regione.marche.it/sso/Check.aspx?auth=';
+    const COHESION2_LOGIN = 'https://cohesion2.regione.marche.it/SA/AccediCohesion.aspx?auth=';
+    const COHESION2_WS = 'https://cohesion2.regione.marche.it/sso/WsCheckSessionSSO.asmx';
     const COHESION2_WEB = 'https://cohesion2.regione.marche.it/SSO/webCheckSessionSSO.aspx';
     const SESSION_NAME = 'cohesion2';
     
@@ -37,7 +37,8 @@ class Cohesion2{
     public $username;
     
     /**
-     * Profilo dell'utente come fornito da Cohesion. Valori forniti (alcuni non sempre valorizzati):
+     * Profilo dell'utente come fornito da Cohesion. Valori forniti (alcuni non 
+     * sempre valorizzati):
      * titolo, nome, cognome, sesso, login, codice_fiscale, telefono,
      * localita_nascita, provincia_nascita, cap_nascita, regione_nascita,
      * data_nascita, nazione_nascita, gruppo, ruolo, email, email_certificata,
@@ -50,7 +51,6 @@ class Cohesion2{
     public $profile;
     
     function __construct(){
-        //file_put_contents('log.txt',__METHOD__."\n",FILE_APPEND);
         //controllo se la sessione è stata avviata
         if(version_compare(PHP_VERSION,'5.4.0')>=0){
             if(session_status() == PHP_SESSION_NONE) session_start();
@@ -59,7 +59,7 @@ class Cohesion2{
             if(session_id() == '')  session_start();
         }
         if($this->isAuth()){
-            //file_put_contents('log.txt',"Utente già autenticato, ripristino sessione\n",FILE_APPEND);
+            //Utente già autenticato, ripristino sessione
             $obj=unserialize($_SESSION[self::SESSION_NAME]);
             $this->id_sso = $obj->id_sso;
             $this->id_aspnet = $obj->id_aspnet;
@@ -69,12 +69,14 @@ class Cohesion2{
     }
     
     /**
-     * Imposta i metodi di autenticazione permessi nella pagina di login Cohesion
-     * @param string $authRestriction (separare le varie scelte con una virgola). Valore di default: 0,1,2,3
+     * Imposta i metodi di autenticazione permessi
+     * @param string $authRestriction (separare le varie scelte con una virgola)
+     * Valore di default: 0,1,2,3
      * 0 indica di mostrare l’autenticazione con Utente e Password
      * 1 indica di mostrare l’autenticazione con Utente, Password e PIN
      * 2 indica di mostrare l’autenticazione con Smart Card
-     * 3 indica di mostrare l’autenticazione di Dominio (valida solo per utenti interni alla rete regionale)
+     * 3 indica di mostrare l’autenticazione di Dominio (valida solo per utenti 
+     * interni alla rete regionale)
      * @return void
      */
     public function setAuthRestriction($authRestriction){
@@ -83,7 +85,7 @@ class Cohesion2{
     
     /**
      * Controlla se l'utente è già stato autenticato
-     * @return type
+     * @return boolean
      */
     public function isAuth(){
     	return isset($_SESSION[self::SESSION_NAME]);
