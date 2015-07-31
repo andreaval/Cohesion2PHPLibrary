@@ -42,9 +42,9 @@ Per disabilitare, eventualmente il SSO, e forzare quindi sempre all’autenticaz
 ## Spiegazione del meccanismo di autenticazione
 Invocando il metodo auth() della classe Cohesion2 viene avviato il processo di autenticazione tramite SSO. Il processo si svolge in 4 passi:
 
-1. Viene invocata la pagina web http://cohesion2.regione.marche.it/sso/Check.aspx per verificare se l’utente risulti già autenticato tramite SSO
-2. Nel caso l’utente non sia autenticato, il browser dell’utente viene automaticamente reindirizzato alla pagina di login http://cohesion2.regione.marche.it/SA/LoginFrame2.aspx 
-3. Se l’autenticazione ha esito positivo, la libreria istanzia una variabile di sessione  per tenere traccia dell’avvenuta autenticazione ed invoca il WebService http://cohesion2.regione.marche.it/sso/WsCheckSessionSSO.asmx o la pagina web https://cohesion2.regione.marche.it/SSO/webCheckSessionSSO.aspx (a seconda se si fa uso o meno del certificato digitale) per recuperare il profilo dell’utente autenticato
+1. Viene invocata la pagina web https://cohesion2.regione.marche.it/sso/Check.aspx per verificare se l’utente risulti già autenticato tramite SSO
+2. Nel caso l’utente non sia autenticato, il browser dell’utente viene automaticamente reindirizzato alla pagina di login https://cohesion2.regione.marche.it/SA/AccediCohesion.aspx
+3. Se l’autenticazione ha esito positivo, la libreria istanzia una variabile di sessione  per tenere traccia dell’avvenuta autenticazione ed invoca il WebService https://cohesion2.regione.marche.it/sso/WsCheckSessionSSO.asmx o la pagina web https://cohesion2.regione.marche.it/SSO/webCheckSessionSSO.aspx (a seconda se si fa uso o meno del certificato digitale) per recuperare il profilo dell’utente autenticato
 4. Se il recupero del profilo è avvenuto correttamente i dati dell’utente saranno accessibili tramite le seguenti proprietà dell’oggetto istanziato:
   1.	`$cohesion->username` (Username utente autenticato)
   2.	`$cohesion->id_sso` (ID della sessione SSO)
@@ -105,5 +105,4 @@ Per creare i file .pem avendo a disposizione il certificato con estensione .p12,
 
       openssl pkcs12 -in path.p12 -out newfile.crt.pem -clcerts -nokeys
       openssl pkcs12 -in path.p12 -out newfile.key.pem -nocerts –nodes
-
 
