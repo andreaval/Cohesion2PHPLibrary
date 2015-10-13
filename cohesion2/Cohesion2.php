@@ -1,9 +1,10 @@
 <?php
 /**
  * Classe per la gestione del SSO di Cohesion2
- * @version 2.1.1 31/07/2015 16.48
+ * @version 2.1.2 09/10/15 17.22
  * @license MIT License <http://opensource.org/licenses/MIT>
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
+ * @link http://cohesion.regione.marche.it/cohesioninformativo/
  */
 class Cohesion2{
     
@@ -77,6 +78,8 @@ class Cohesion2{
      * 2 indica di mostrare l’autenticazione con Smart Card
      * 3 indica di mostrare l’autenticazione di Dominio (valida solo per utenti 
      * interni alla rete regionale)
+     * NON TUTTE LE COMBINAZIONI VENGONO ACCETTATE (es. 0,1 vengono comunque 
+     * mostrati tutti i metodi)
      * @return void
      */
     public function setAuthRestriction($authRestriction){
@@ -121,7 +124,7 @@ class Cohesion2{
     public function auth(){
         //file_put_contents('log.txt',__METHOD__."\n",FILE_APPEND);
         if(!$this->isAuth()){
-            if($_REQUEST['auth']){
+            if(!empty($_REQUEST['auth'])){
                 $this->verify($_REQUEST['auth']);
             }
             else{
@@ -168,9 +171,10 @@ class Cohesion2{
     
     private function check(){
         //file_put_contents('log.txt',__METHOD__."\n",FILE_APPEND);
-        $protocol = ($_SERVER["SERVER_PORT"]==443) ? 'https://' : 'http://';
+        $protocol = ($_SERVER["SERVER_PORT"] == 443) ? 'https://' : 'http://';
     	$urlPagina = $protocol.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-        $urlPagina .= (!$_SERVER['QUERY_STRING']) ? '?cohesionCheck=1' : '&cohesionCheck=1';
+        $urlPagina .= ($_SERVER['QUERY_STRING']) ? '&' : '?';
+        $urlPagina .= 'cohesionCheck=1';
         $xmlAuth='<dsAuth xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://tempuri.org/Auth.xsd">
             <auth>
                 <user />
@@ -179,18 +183,18 @@ class Cohesion2{
                 <esito_auth_sa />
                 <id_sessione_sa />
                 <id_sessione_aspnet_sa />
-                <url_validate>'.$urlPagina.'</url_validate>
-                <url_richiesta>'.$urlPagina.'</url_richiesta>
+                <url_validate><![CDATA['.$urlPagina.']]></url_validate>
+                <url_richiesta><![CDATA['.$urlPagina.']]></url_richiesta>
                 <esito_auth_sso />
                 <id_sessione_sso />
                 <id_sessione_aspnet_sso />
-                <stilesheet>AuthRestricion='.$this->authRestriction.'</stilesheet>
+                <stilesheet>AuthRestriction='.$this->authRestriction.'</stilesheet>
                 <AuthRestriction xmlns="">'.$this->authRestriction.'</AuthRestriction>
             </auth>
         </dsAuth>';
         //file_put_contents('log.txt',$xmlAuth."\n",FILE_APPEND);
         $auth = urlencode(base64_encode($xmlAuth));
-        $urlLogin=($this->sso) ? self::COHESION2_CHECK.$auth : self::COHESION2_LOGIN.$auth;
+        $urlLogin = ($this->sso) ? self::COHESION2_CHECK.$auth : self::COHESION2_LOGIN.$auth;
         //file_put_contents('log.txt',$urlLogin."\n",FILE_APPEND);
         header("Location: $urlLogin");
         exit;
