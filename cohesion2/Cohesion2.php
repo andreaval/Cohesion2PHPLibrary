@@ -46,7 +46,7 @@ class Cohesion2{
      * telefono_ufficio, fax_ufficio, numero_cellulare, indirizzo_residenza,
      * localita_residenza, provincia_residenza, cap_residenza, regione_residenza,
      * nazione_residenza, professione, settore_azienda, profilo_familiare,
-     * tipo_autenticazione (PW,CF)
+     * tipo_autenticazione (PW,CF,PIN,DRM)
      * @var array
      */
     public $profile;
