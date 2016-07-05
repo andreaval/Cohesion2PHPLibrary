@@ -1,7 +1,7 @@
 <?php
 /**
  * Classe per la gestione del SSO di Cohesion2
- * @version 2.1.2 09/10/15 17.22
+ * @version 2.1.3 05/07/16 14.57
  * @license MIT License <http://opensource.org/licenses/MIT>
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
  * @link http://cohesion.regione.marche.it/cohesioninformativo/
@@ -57,11 +57,11 @@ class Cohesion2{
             if(session_status() == PHP_SESSION_NONE) session_start();
     	}
         else{
-            if(session_id() == '')  session_start();
+            if(session_id() == '') session_start();
         }
         if($this->isAuth()){
             //Utente già autenticato, ripristino sessione
-            $obj=unserialize($_SESSION[self::SESSION_NAME]);
+            $obj = unserialize($_SESSION[self::SESSION_NAME]);
             $this->id_sso = $obj->id_sso;
             $this->id_aspnet = $obj->id_aspnet;
             $this->username = $obj->username;
@@ -175,7 +175,7 @@ class Cohesion2{
     	$urlPagina = $protocol.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
         $urlPagina .= ($_SERVER['QUERY_STRING']) ? '&' : '?';
         $urlPagina .= 'cohesionCheck=1';
-        $xmlAuth='<dsAuth xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://tempuri.org/Auth.xsd">
+        $xmlAuth = '<dsAuth xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://tempuri.org/Auth.xsd">
             <auth>
                 <user />
                 <id_sa />
@@ -202,14 +202,14 @@ class Cohesion2{
     
     private function verify($auth){
         //file_put_contents('log.txt',__METHOD__."\n",FILE_APPEND);
-        $xml=base64_decode($auth);
+        $xml = trim(base64_decode($auth));
         //file_put_contents('log.txt',$xml."\n",FILE_APPEND);
-        $domXML = new domDocument;
-        $domXML->loadXML(trim($xml));
+        $domXML = new DOMDocument;
+        $domXML->loadXML($xml);
         $this->id_sso = $domXML->getElementsByTagName('id_sessione_sso')->item(0)->nodeValue;
         $this->id_aspnet = $domXML->getElementsByTagName('id_sessione_aspnet_sso')->item(0)->nodeValue;
         $this->username = $domXML->getElementsByTagName('user')->item(0)->nodeValue;
-        $esito=$domXML->getElementsByTagName('esito_auth_sso')->item(0)->nodeValue;
+        $esito = $domXML->getElementsByTagName('esito_auth_sso')->item(0)->nodeValue;
         if($esito!='OK') return false;
         
         if($this->cert_file){
@@ -217,7 +217,7 @@ class Cohesion2{
             $wsClient = new Cohesion2SOAP(self::COHESION2_WS.'?wsdl');
             $wsClient->__setCert($this->cert_file,$this->key_file);
             $risposta = $wsClient->GetCredential(new Cohesion2ParamsSSO($this->id_sso,$this->id_aspnet));
-            $domXML = new domDocument;
+            $domXML = new DOMDocument;
             $domXML->loadXML($risposta->GetCredentialResult);
         }
         else{
@@ -231,19 +231,19 @@ class Cohesion2{
                 ),
             ));
             $result = file_get_contents(self::COHESION2_WEB,false,$context);
-            $domXML = new domDocument;
+            $domXML = new DOMDocument;
             $domXML->loadXML($result);
             //file_put_contents('log.txt',var_export($result,1)."\n",FILE_APPEND);
         }
         $profilo = simplexml_import_dom($domXML);
         $base = current($profilo->xpath('//base'));
         if($base->login){
-            $resp=array();
+            $resp = array();
             foreach($base->children() as $node){
-                $resp[$node->getName()]=(string)$node;
+                $resp[$node->getName()] = (string)$node;
             }
-            $this->profile=$resp;
-            $_SESSION[self::SESSION_NAME]=serialize($this);
+            $this->profile = $resp;
+            $_SESSION[self::SESSION_NAME] = serialize($this);
             return true;
         }
         else throw new Exception('Impossibile recuperare il profilo utente da Cohesion2');
