@@ -2,7 +2,7 @@
     "name": "andreaval/cohesion2-library",
     "description": "Libreria per l'autenticazione al sistema di SSO Cohesion2 della Regione Marche",
     "type": "library",
-    "keywords": ["php", "Cohesion2", "Regione Marche"],
+    "keywords": ["php", "Cohesion2", "Regione Marche", "SSO", "Single Sign-On"],
     "homepage": "https://github.com/andreaval/Cohesion2PHPLibrary",
     "license": "MIT",
     "authors": [
