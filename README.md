@@ -117,4 +117,4 @@ La libreria dispone già di un certificato valido, tuttavia se si ha a disposizi
 Per creare i file .pem avendo a disposizione il certificato con estensione .p12, utilizzare la libreria openssl:
 
       openssl pkcs12 -in path.p12 -out newfile.crt.pem -clcerts -nokeys
-      openssl pkcs12 -in path.p12 -out newfile.key.pem -nocerts –nodes
+      openssl pkcs12 -in path.p12 -out newfile.key.pem –nodes -nocerts
