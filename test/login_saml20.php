@@ -4,9 +4,7 @@ error_reporting(E_ALL);
 require_once '../cohesion2/Cohesion2.php';
 try{
     $cohesion=new Cohesion2;
-    //$cohesion->setAuthRestriction('1,2');
-    //$cohesion->useSSO(false);
-    //$cohesion->setCertificate('cert/cohesion2.crt.pem','cert/cohesion2.key.pem');
+    $cohesion->useSAML20(true);
     $cohesion->auth();
 }
 catch(Exception $e){

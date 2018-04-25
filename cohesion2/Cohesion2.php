@@ -1,7 +1,7 @@
 <?php
 /**
  * Classe per la gestione del SSO di Cohesion2
- * @version 2.1.3 05/07/16 14.57
+ * @version 2.2.0 20/04/18 17.30
  * @license MIT License <http://opensource.org/licenses/MIT>
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
  * @link http://cohesion.regione.marche.it/cohesioninformativo/
@@ -12,12 +12,15 @@ class Cohesion2{
     const COHESION2_LOGIN = 'https://cohesion2.regione.marche.it/SA/AccediCohesion.aspx?auth=';
     const COHESION2_WS = 'https://cohesion2.regione.marche.it/sso/WsCheckSessionSSO.asmx';
     const COHESION2_WEB = 'https://cohesion2.regione.marche.it/SSO/webCheckSessionSSO.aspx';
+    const COHESION2_SAML20_CHECK = 'https://cohesion2.regione.marche.it/SPManager/WAYF.aspx?auth=';
+    const COHESION2_SAML20_WS = 'https://cohesion2.regione.marche.it/SPManager/wsCheckSessionSPM.asmx';
     const SESSION_NAME = 'cohesion2';
     
     private $authRestriction = '0,1,2,3';
     private $cert_file = null;
     private $key_file = null;
     private $sso = true;
+    private $saml20 = false;
     
     /**
      * ID sessione SSO
@@ -80,10 +83,11 @@ class Cohesion2{
      * interni alla rete regionale)
      * NON TUTTE LE COMBINAZIONI VENGONO ACCETTATE (es. 0,1 vengono comunque 
      * mostrati tutti i metodi)
-     * @return void
+     * @return Cohesion2
      */
     public function setAuthRestriction($authRestriction){
     	if($authRestriction) $this->authRestriction = $authRestriction;
+        return $this;
     }
     
     /**
@@ -98,11 +102,12 @@ class Cohesion2{
      * Imposta il ceritificato per invocare il WS del SSO. (Opzionale)
      * @param string $certFilePath File .pem contenente il certificato
      * @param string $keyFilePath File .pem contenente la chiave privata
-     * @return void
+     * @return Cohesion2
      */
     public function setCertificate($certFilePath,$keyFilePath){
     	$this->cert_file = $certFilePath;
         $this->key_file = $keyFilePath;
+        return $this;
     }
     
     /**
@@ -110,10 +115,24 @@ class Cohesion2{
      * sempre reindirizzato alla pagina di login senza controllare se esso 
      * risulta autenticato o meno tramite SSO
      * @param boolean $on
-     * @return void
+     * @return Cohesion2
      */
     public function useSSO($on=TRUE){
         $this->sso = $on;
+        return $this;
+    }
+    
+    /**
+     * Abilita o meno il funzionamento del SSO in modalità SAML2.0. Questa modalità
+     * attiva, se non attivato, il SSO. 
+     * @param boolean $on
+     * @return Cohesion2
+     */
+    public function useSAML20($on=TRUE){
+        $this->useSSO(true);
+        $this->saml20 = $on;
+        $this->setCertificate('cert/cohesion2.crt.pem','cert/cohesion2.key.pem');
+        return $this;
     }
     
     /**
@@ -140,10 +159,10 @@ class Cohesion2{
     public function logout(){
         if($this->isAuth()){
             unset($_SESSION[self::SESSION_NAME]);
-            if($this->cert_file){
-                $wsClient = new Cohesion2SOAP(self::COHESION2_WS.'?wsdl');
+            if($this->cert_file || $this->saml20){
+                $wsClient = new Cohesion2SOAP($this->saml20 ? self::COHESION2_SAML20_WS.'?wsdl' : self::COHESION2_WS.'?wsdl');
                 $wsClient->__setCert($this->cert_file,$this->key_file);
-                $wsClient->LogoutSito(new Cohesion2ParamsSSO($this->id_sso,$this->id_aspnet));
+                $risposta=$wsClient->LogoutSito(new Cohesion2ParamsSSO($this->id_sso,$this->id_aspnet));
             }
             else{
                 $data = array('Operation'=>'LogoutSito','IdSessioneSSO'=>$this->id_sso,'IdSessioneASPNET'=>$this->id_aspnet);
@@ -194,7 +213,12 @@ class Cohesion2{
         </dsAuth>';
         //file_put_contents('log.txt',$xmlAuth."\n",FILE_APPEND);
         $auth = urlencode(base64_encode($xmlAuth));
-        $urlLogin = ($this->sso) ? self::COHESION2_CHECK.$auth : self::COHESION2_LOGIN.$auth;
+        if($this->saml20){
+            $urlLogin = self::COHESION2_SAML20_CHECK.$auth;
+        }
+        else{
+            $urlLogin = ($this->sso) ? self::COHESION2_CHECK.$auth : self::COHESION2_LOGIN.$auth;
+        }
         //file_put_contents('log.txt',$urlLogin."\n",FILE_APPEND);
         header("Location: $urlLogin");
         exit;
@@ -212,11 +236,12 @@ class Cohesion2{
         $esito = $domXML->getElementsByTagName('esito_auth_sso')->item(0)->nodeValue;
         if($esito!='OK') return false;
         
-        if($this->cert_file){
+        if($this->cert_file || $this->saml20){
             //file_put_contents('log.txt',"Recupero profilo tramite WS\n",FILE_APPEND);
-            $wsClient = new Cohesion2SOAP(self::COHESION2_WS.'?wsdl');
+            $wsClient = new Cohesion2SOAP($this->saml20 ? self::COHESION2_SAML20_WS.'?wsdl' : self::COHESION2_WS.'?wsdl');
             $wsClient->__setCert($this->cert_file,$this->key_file);
             $risposta = $wsClient->GetCredential(new Cohesion2ParamsSSO($this->id_sso,$this->id_aspnet));
+            //file_put_contents('log.txt',var_export($risposta,1)."\n",FILE_APPEND);
             $domXML = new DOMDocument;
             $domXML->loadXML($risposta->GetCredentialResult);
         }
