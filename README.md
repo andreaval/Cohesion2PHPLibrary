@@ -1,4 +1,4 @@
-# Cohesion2PHPLibrary
+# Cohesion2 libreria PHP
 Libreria per l'autenticazione al sistema di SSO Cohesion2 della Regione Marche. 
 Questa libreria  permette di integrare il  Single Sign-On di Cohesion2 in siti o applicativi web sviluppati in linguaggio PHP. 
 
