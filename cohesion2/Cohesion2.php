@@ -2,7 +2,7 @@
 namespace andreaval\Cohesion2;
 /**
  * Classe per la gestione del SSO di Cohesion2
- * @version 3.0.0 27/03/2023 22.06
+ * @version 3.0.1 27/03/2023 23.44
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
  * @license MIT License <https://github.com/andreaval/Cohesion2PHPLibrary/blob/master/LICENSE>
  * @link http://cohesion.regione.marche.it/cohesioninformativo/
@@ -265,7 +265,7 @@ class Cohesion2{
             $_SESSION[$this->session_name] = serialize($this);
             return true;
         }
-        else throw new Exception('Impossibile recuperare il profilo utente da Cohesion2');
+        else throw new Cohesion2Exception('Impossibile recuperare il profilo utente da Cohesion2');
     }
 }
 
