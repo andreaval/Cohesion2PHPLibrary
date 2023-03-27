@@ -1,7 +1,7 @@
 <?php
 /**
  * Classe per la gestione del SSO di Cohesion2
- * @version 3.0.0 27/03/2023 18.16
+ * @version 3.0.0 27/03/2023 22.06
  * @license MIT License <https://github.com/andreaval/Cohesion2PHPLibrary/blob/master/LICENSE>
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
  * @link http://cohesion.regione.marche.it/cohesioninformativo/
@@ -10,17 +10,20 @@ class Cohesion2{
     
     const COHESION2_CHECK = 'https://cohesion2.regione.marche.it/sso/Check.aspx?auth=';
     const COHESION2_LOGIN = 'https://cohesion2.regione.marche.it/SA/AccediCohesion.aspx?auth=';
-    const COHESION2_WS = 'https://cohesion2.regione.marche.it/sso/WsCheckSessionSSO.asmx';
     const COHESION2_WEB = 'https://cohesion2.regione.marche.it/SSO/webCheckSessionSSO.aspx';
     const COHESION2_SAML20_CHECK = 'https://cohesion2.regione.marche.it/SPManager/WAYF.aspx?auth=';
-    const COHESION2_SAML20_WS = 'https://cohesion2.regione.marche.it/SPManager/wsCheckSessionSPM.asmx';
+    const COHESION2_SAML20_WEB = 'https://cohesion2.regione.marche.it/SPManager/webCheckSessionSSO.aspx';
     const SESSION_NAME = 'cohesion2';
+    const EIDAS_FLAG = 'eidas=1';
+    const PURPOSE_FLAG = 'purpose=';
     
     private $authRestriction = '0,1,2,3';
     private $cert_file = null;
     private $key_file = null;
     private $sso = true;
     private $saml20 = false;
+    private $eIDAS = false;
+    private $SPIDProPurpose = false;
     
     /**
      * ID sessione SSO
@@ -123,15 +126,38 @@ class Cohesion2{
     }
     
     /**
-     * Abilita o meno il funzionamento del SSO in modalità SAML2.0. Questa modalità
-     * attiva, se non attivato, il SSO. 
+     * Abilita o meno il funzionamento del SSO in modalità SAML2.0. Questa 
+     * modalità attiva, se non attivato, il SSO. 
      * @param boolean $on
      * @return Cohesion2
      */
     public function useSAML20($on=TRUE){
         $this->useSSO(true);
         $this->saml20 = $on;
-        $this->setCertificate('cert/cohesion2.crt.pem','cert/cohesion2.key.pem');
+        return $this;
+    }
+    
+    /**
+     * Abilita il login eIDAS (e automaticamente la modalità SAML2.0)
+     * @return Cohesion2
+     */
+    public function enableEIDASLogin(){
+        $this->useSAML20(true);
+        $this->eIDAS = true;
+        return $this;
+    }
+    
+    /**
+     * Abilita il login con SPID Professionale (PF,PG,LP) e automaticamente la modalità SAML2.0)
+     * @param string[] $SPIDProPurposes inserire un array con i purpose richiesti. 
+     *                 Default: PF - SPID per Persone Fisiche ad Uso Professionale.
+     *                 I possibili valori sono: LP, PG, PF, PX Così come indicato 
+     *                 nell'avviso SPID 18 v2: https://www.agid.gov.it/sites/default/files/repository_files/spid-avviso-n18_v.2-_autenticazione_persona_giuridica_o_uso_professionale_per_la_persona_giuridica.pdf
+     * @return Cohesion2
+     */
+    public function enableSPIDProLogin($SPIDProPurposes=['PF']){
+        $this->useSAML20(true);
+        $this->SPIDProPurpose = implode('|',$SPIDProPurposes);
         return $this;
     }
     
@@ -159,22 +185,15 @@ class Cohesion2{
     public function logout(){
         if($this->isAuth()){
             unset($_SESSION[self::SESSION_NAME]);
-            if($this->cert_file || $this->saml20){
-                $wsClient = new Cohesion2SOAP($this->saml20 ? self::COHESION2_SAML20_WS.'?wsdl' : self::COHESION2_WS.'?wsdl');
-                $wsClient->__setCert($this->cert_file,$this->key_file);
-                $risposta=$wsClient->LogoutSito(new Cohesion2ParamsSSO($this->id_sso,$this->id_aspnet));
-            }
-            else{
-                $data = array('Operation'=>'LogoutSito','IdSessioneSSO'=>$this->id_sso,'IdSessioneASPNET'=>$this->id_aspnet);
-                $context  = stream_context_create(array(
-                    'http' => array(
-                        'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                        'method'  => 'POST',
-                        'content' => http_build_query($data),
-                    ),
-                ));
-                file_get_contents(self::COHESION2_WEB,false,$context);
-            }
+            $data = array('Operation'=>'LogoutSito','IdSessioneSSO'=>$this->id_sso,'IdSessioneASPNET'=>$this->id_aspnet);
+            $context  = stream_context_create(array(
+                'http' => array(
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'  => 'POST',
+                'content' => http_build_query($data),
+                ),
+            ));
+            file_get_contents(self::COHESION2_WEB,false,$context);
         }
     }
     
@@ -207,7 +226,7 @@ class Cohesion2{
                 <esito_auth_sso />
                 <id_sessione_sso />
                 <id_sessione_aspnet_sso />
-                <stilesheet>AuthRestriction='.$this->authRestriction.'</stilesheet>
+                <stilesheet>AuthRestriction='.$this->authRestriction.($this->eIDAS? ';'.self::EIDAS_FLAG : '').($this->SPIDProPurpose ? ';'.self::PURPOSE_FLAG.$this->SPIDProPurpose: '').'</stilesheet>
                 <AuthRestriction xmlns="">'.$this->authRestriction.'</AuthRestriction>
             </auth>
         </dsAuth>';
@@ -236,34 +255,23 @@ class Cohesion2{
         $esito = $domXML->getElementsByTagName('esito_auth_sso')->item(0)->nodeValue;
         if($esito!='OK') return false;
         
-        if($this->cert_file || $this->saml20){
-            //file_put_contents('log.txt',"Recupero profilo tramite WS\n",FILE_APPEND);
-            $wsClient = new Cohesion2SOAP($this->saml20 ? self::COHESION2_SAML20_WS.'?wsdl' : self::COHESION2_WS.'?wsdl');
-            $wsClient->__setCert($this->cert_file,$this->key_file);
-            $risposta = $wsClient->GetCredential(new Cohesion2ParamsSSO($this->id_sso,$this->id_aspnet));
-            //file_put_contents('log.txt',var_export($risposta,1)."\n",FILE_APPEND);
-            $domXML = new DOMDocument;
-            $domXML->loadXML($risposta->GetCredentialResult);
-        }
-        else{
-            //file_put_contents('log.txt',"Recupero profilo tramite pagina web\n",FILE_APPEND);
-            $data = array('Operation'=>'GetCredential','IdSessioneSSO'=>$this->id_sso,'IdSessioneASPNET'=>$this->id_aspnet);
-            $context  = stream_context_create(array(
-                'http' => array(
-                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                    'method'  => 'POST',
-                    'content' => http_build_query($data),
-                ),
-            ));
-            $result = file_get_contents(self::COHESION2_WEB,false,$context);
-            $domXML = new DOMDocument;
-            $domXML->loadXML($result);
-            //file_put_contents('log.txt',var_export($result,1)."\n",FILE_APPEND);
-        }
+        //file_put_contents('log.txt',"Recupero profilo tramite pagina web\n",FILE_APPEND);
+        $data = ['Operation'=>'GetCredential','IdSessioneSSO'=>$this->id_sso,'IdSessioneASPNET'=>$this->id_aspnet];
+        $context  = stream_context_create([
+            'http' => [
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'  => 'POST',
+                'content' => http_build_query($data),
+            ]
+        ]);
+        
+        $result = file_get_contents($this->saml20 ? self::COHESION2_SAML20_WEB : self::COHESION2_WEB,false,$context);
+        $domXML->loadXML($result);
+        //file_put_contents('log.txt',var_export($result,1)."\n",FILE_APPEND);
         $profilo = simplexml_import_dom($domXML);
         $base = current($profilo->xpath('//base'));
         if($base->login){
-            $resp = array();
+            $resp = [];
             foreach($base->children() as $node){
                 $resp[$node->getName()] = (string)$node;
             }
@@ -274,45 +282,6 @@ class Cohesion2{
         else throw new Exception('Impossibile recuperare il profilo utente da Cohesion2');
     }
     
-}
-
-class Cohesion2SOAP extends SoapClient{
-
-    private $cert_file;
-    private $key_file;
-   
-    function __setCert($cert_file,$key_file){
-       $this->cert_file = $cert_file;
-       $this->key_file = $key_file;
-    }
- 	
-    function __doRequest($request, $location, $saction, $version, $one_way = NULL) {
-        require_once dirname(__FILE__).'/wsSecurity.php';
-        $doc = new DOMDocument('1.0');
-        $doc->loadXML($request);
-        $objWSA = new WSASoap($doc);
-        $objWSA->addAction($saction);
-        $objWSA->addTo($location);
-        $objWSA->addMessageID();
-        $objWSA->addCohesion();
-        $objWSA->addReplyTo();
-        $doc = $objWSA->getDoc();
-        $objWSSE = new WSSESoap($doc);
-        /* Sign all headers to include signing the WS-Addressing headers */
-        $objWSSE->signAllHeaders = TRUE;
-        $objWSSE->addTimestamp(); //add Timestamp with no expiration timestamp
-        //create new XMLSec Key using RSA SHA-1 and type is private key
-        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type'=>'private'));
-        // load the private key from file - last arg is bool if key in file (TRUE) or is string (FALSE)
-        $objKey->loadKey(dirname(__FILE__).'/'.$this->key_file, TRUE);
-        // Sign the message - also signs appropraite WS-Security items
-        $objWSSE->signSoapDoc($objKey);
-        // Add certificate (BinarySecurityToken) to the message and attach pointer to Signature
-        $token = $objWSSE->addBinaryToken(file_get_contents(dirname(__FILE__).'/'.$this->cert_file));
-        $objWSSE->attachTokentoSig($token);
-        $request = $objWSSE->saveXML();
-        return parent::__doRequest($request, $location, $saction, $version);
-    }
 }
 
 class Cohesion2ParamsSSO{
