@@ -18,9 +18,8 @@ class Cohesion2{
     const EIDAS_FLAG = 'eidas=1';
     const PURPOSE_FLAG = 'purpose=';
     
+    private $session_name;
     private $authRestriction = '0,1,2,3';
-    private $cert_file = null;
-    private $key_file = null;
     private $sso = true;
     private $saml20 = false;
     private $eIDAS = false;
@@ -50,12 +49,17 @@ class Cohesion2{
      */
     public $profile;
     
-    function __construct(){
+    /**
+     * Costruttore
+     * @param string $session_name Nome da assegnare alla variabile di sessione. Default: cohesion2
+     */
+    function __construct($session_name='cohesion2'){
+        $this->session_name = (string)$session_name;
         //controllo se la sessione è stata avviata
         if(session_status() == PHP_SESSION_NONE) session_start();
         if($this->isAuth()){
             //Utente già autenticato, ripristino sessione
-            $obj = unserialize($_SESSION[self::SESSION_NAME]);
+            $obj = unserialize($_SESSION[$this->session_name]);
             $this->id_sso = $obj->id_sso;
             $this->id_aspnet = $obj->id_aspnet;
             $this->username = $obj->username;
@@ -86,19 +90,7 @@ class Cohesion2{
      * @return boolean
      */
     public function isAuth(){
-    	return isset($_SESSION[self::SESSION_NAME]);
-    }
-    
-    /**
-     * Imposta il ceritificato per invocare il WS del SSO. (Opzionale)
-     * @param string $certFilePath File .pem contenente il certificato
-     * @param string $keyFilePath File .pem contenente la chiave privata
-     * @return Cohesion2
-     */
-    public function setCertificate($certFilePath,$keyFilePath){
-    	$this->cert_file = $certFilePath;
-        $this->key_file = $keyFilePath;
-        return $this;
+    	return isset($_SESSION[$this->session_name]);
     }
     
     /**
@@ -172,7 +164,7 @@ class Cohesion2{
      */
     public function logout(){
         if($this->isAuth()){
-            unset($_SESSION[self::SESSION_NAME]);
+            unset($_SESSION[$this->session_name]);
             $data = ['Operation'=>'LogoutSito','IdSessioneSSO'=>$this->id_sso,'IdSessioneASPNET'=>$this->id_aspnet];
             $context  = stream_context_create([
                 'http' => [
@@ -194,7 +186,7 @@ class Cohesion2{
      */
     public function logoutLocal(){
         if($this->isAuth()){
-            unset($_SESSION[self::SESSION_NAME]);
+            unset($_SESSION[$this->session_name]);
         }
     }
     
@@ -270,7 +262,7 @@ class Cohesion2{
                 $resp[$node->getName()] = (string)$node;
             }
             $this->profile = $resp;
-            $_SESSION[self::SESSION_NAME] = serialize($this);
+            $_SESSION[$this->session_name] = serialize($this);
             return true;
         }
         else throw new Exception('Impossibile recuperare il profilo utente da Cohesion2');
