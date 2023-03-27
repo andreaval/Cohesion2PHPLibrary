@@ -1,9 +1,10 @@
 <?php
+namespace andreaval\Cohesion2;
 /**
  * Classe per la gestione del SSO di Cohesion2
  * @version 3.0.0 27/03/2023 22.06
- * @license MIT License <https://github.com/andreaval/Cohesion2PHPLibrary/blob/master/LICENSE>
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
+ * @license MIT License <https://github.com/andreaval/Cohesion2PHPLibrary/blob/master/LICENSE>
  * @link http://cohesion.regione.marche.it/cohesioninformativo/
  */
 class Cohesion2{
@@ -44,15 +45,7 @@ class Cohesion2{
     public $username;
     
     /**
-     * Profilo dell'utente come fornito da Cohesion. Valori forniti (alcuni non 
-     * sempre valorizzati):
-     * titolo, nome, cognome, sesso, login, codice_fiscale, telefono,
-     * localita_nascita, provincia_nascita, cap_nascita, regione_nascita,
-     * data_nascita, nazione_nascita, gruppo, ruolo, email, email_certificata,
-     * telefono_ufficio, fax_ufficio, numero_cellulare, indirizzo_residenza,
-     * localita_residenza, provincia_residenza, cap_residenza, regione_residenza,
-     * nazione_residenza, professione, settore_azienda, profilo_familiare,
-     * tipo_autenticazione (PW,CF,PIN,DRM)
+     * Profilo dell'utente contenente i dati forniti dal server
      * @var array
      */
     public $profile;
@@ -196,7 +189,7 @@ class Cohesion2{
                     'ciphers' => 'DEFAULT:!DH'
                 ]
             ]);
-            file_get_contents(self::COHESION2_WEB,false,$context);
+            file_get_contents($this->saml20 ? self::COHESION2_SAML20_WEB : self::COHESION2_WEB,false,$context);
         }
     }
     
@@ -250,7 +243,7 @@ class Cohesion2{
         //file_put_contents('log.txt',__METHOD__."\n",FILE_APPEND);
         $xml = trim(base64_decode($auth));
         //file_put_contents('log.txt',$xml."\n",FILE_APPEND);
-        $domXML = new DOMDocument;
+        $domXML = new \DOMDocument;
         $domXML->loadXML($xml);
         $this->id_sso = $domXML->getElementsByTagName('id_sessione_sso')->item(0)->nodeValue;
         $this->id_aspnet = $domXML->getElementsByTagName('id_sessione_aspnet_sso')->item(0)->nodeValue;
@@ -287,14 +280,6 @@ class Cohesion2{
         }
         else throw new Exception('Impossibile recuperare il profilo utente da Cohesion2');
     }
-    
 }
 
-class Cohesion2ParamsSSO{
-    public $IdSessioneSSO;
-    public $IdSessioneASPNET;
-    function __construct($sso,$aspnet){
-        $this->IdSessioneSSO = $sso;
-        $this->IdSessioneASPNET = $aspnet;
-    }
-}
+class Cohesion2Exception extends \Exception{}
