@@ -3,23 +3,14 @@ Libreria per l'autenticazione al sistema di SSO Cohesion2 della Regione Marche.
 Questa libreria  permette di integrare il  Single Sign-On di Cohesion2 in siti o applicativi web sviluppati in linguaggio PHP. 
 
 ## Requisiti di installazione
-* PHP 5
-* Estensione PHP SOAP (se si fa uso della modalità SAML 2.0)
-* Nel file php.ini  assicurarsi che il parametro allow_url_fopen sia impostato a On (se non si usa la modalità SAML 2.0)
+* PHP 5.4
+* Nel file php.ini  assicurarsi che il parametro allow_url_fopen sia impostato a On
 
 ## Installazione
 Usando il package manager [composer](https://getcomposer.org/) installare il pacchetto *andreaval/cohesion2-library*
 oppure
-**manualmente** copiando la directory cohesion2 in un qualsiasi punto della cartella web dell’applicativo. Assicurarsi che la cartella contenga i seguenti file:
+**manualmente** copiando la directory cohesion2 in un qualsiasi punto della cartella web dell’applicativo. Assicurarsi che la cartella contenga il seguente file:
 -	Cohesion2.php
--	wsSecurity.php
--	cert/cohesion2.crt.pem
--	cert/cohesion2.key.pem
--	cert/Regione_marche_rootca_sha2.cer
--	cert/Regione_marche_subca_sha2.cer
-
-## Installazione certificati
-Per l'utilizzo di SAML 2.0 installare nel server i certificati della **CA Regione Marche** presenti nella cartella *cert*
 
 ## Abilitazione SSO
 Il Single Sign-On è abilitato per default nella libreria. Questo significa che prima di reindirizzare l’utente alla maschera di login, il sistema verifica la validità della sessione ed evita quindi all’utente di doversi riautenticare.
@@ -56,6 +47,8 @@ E' possibile indicare a Cohesion di utilizzare lo standard SAML 2.0 tramite l'ap
 ```php
       $cohesion = new Cohesion2;
       $cohesion->useSAML20(true);
+      $cohesion->enableEIDASLogin(); //se si intende abilitare il login eIDAS
+      $cohesion->enableSPIDProLogin(array("PF", "PG", "LP")); //se si intende abilitare il login SPID Professionale
       $cohesion->auth();
 ```
 
@@ -64,20 +57,45 @@ Invocando il metodo auth() della classe Cohesion2 viene avviato il processo di a
 
 1. Viene invocata la pagina web https://cohesion2.regione.marche.it/sso/Check.aspx per verificare se l’utente risulti già autenticato tramite SSO
 2. Nel caso l’utente non sia autenticato, il browser dell’utente viene automaticamente reindirizzato alla pagina di login https://cohesion2.regione.marche.it/SA/AccediCohesion.aspx
-3. Se l’autenticazione ha esito positivo, la libreria istanzia una variabile di sessione  per tenere traccia dell’avvenuta autenticazione ed invoca il WebService https://cohesion2.regione.marche.it/sso/WsCheckSessionSSO.asmx o la pagina web https://cohesion2.regione.marche.it/SSO/webCheckSessionSSO.aspx (a seconda se si fa uso o meno del certificato digitale) per recuperare il profilo dell’utente autenticato
+3. Se l’autenticazione ha esito positivo, la libreria istanzia una variabile di sessione per tenere traccia dell’avvenuta autenticazione ed invoca la pagina web https://cohesion2.regione.marche.it/SSO/webCheckSessionSSO.aspx per recuperare il profilo dell’utente autenticato
 4. Se il recupero del profilo è avvenuto correttamente i dati dell’utente saranno accessibili tramite le seguenti proprietà dell’oggetto istanziato:
 - `$cohesion->username` (Username utente autenticato)
 - `$cohesion->id_sso` (ID della sessione SSO)
 - `$cohesion->id_aspnet` (ID della sessione ASPNET)
 - `$cohesion->profile` (Array contenente il profilo della persona)
 
+Per la configurazione SAML 2.0 il funzionamento è analogo, cambiano solamente gli endpoint utilizzati e le possibilita di accesso per l'utente (SPID, CIE-ID, CNS, Cohesion, eIDAS, ...)
+
 ## Profilo utente autenticato
-Tramite la proprietà  *profile*  è possibile accedere ai dati del profilo utente. I campi disponibili sono quelli forniti dal 
-sistema Cohesion e vengono istanziati come chiavi dell’array profile (non tutti i campi possono risultare valorizzati): 
-*titolo, nome, cognome, sesso, login, codice_fiscale, telefono, localita_nascita, provincia_nascita, cap_nascita, regione_nascita,
+Tramite la proprietà  *profile*  è possibile accedere ai dati del profilo utente. 
+I valori ritornati dal sistema di autenticazione vengono istanziati come chiavi dell’array profile (non tutti i campi possono risultare valorizzati).
+
+Nel login tramite sistema Cohesione i valori disponibili sono:
+*titolo, nome, cognome, sesso, login, codice_fiscale, spidCode, telefono, localita_nascita, provincia_nascita, cap_nascita, regione_nascita,
 data_nascita, nazione_nascita, gruppo, ruolo, email, mail_certificata, telefono_ufficio, fax_ufficio, numero_cellulare, 
 indirizzo_residenza, localita_residenza, provincia_residenza, cap_residenza, regione_residenza, nazione_residenza, professione, 
 settore_azienda, profilo_familiare, tipo_autenticazione (PW,CF)*.
+
+Nel login tramite sistema SPID i valori disponibili sono (alcuni campo hanno una doppia dicitura):
+- address (alias: indirizzo_residenza)
+- companyFiscalNumber (alias: Codice_fiscale_persona_giuridica)
+- countyOfBirth (alias: provincia_nascita)
+- dateOfBirth (data nel formato inglese yyyy-mm-dd)
+- data_nascita (data nel formato italiano gg/mm/aaaa)
+- digitalAddress
+- email_certificata
+- email (alias: Indirizzo_di_posta_elettronica)
+- familyName (alias: cognome)
+- fiscalNumber (codice fiscale preceduto da TINIT-)
+- codice_fiscale
+- gender (alias: sesso)
+- ivaCode (alias: Partita_IVA)
+- name (alias: nome)
+- placeOfBirth (codice istat comune di nascita)
+- localita_nascita (nome del comune di nascita)
+- spidCode (alias: Codice_identificativo_SPID)
+- tipo_autenticazione
+- login (contiene il codice fiscale)
 
 Esempio:
 
@@ -126,16 +144,12 @@ N.B. Se si intende limitare l’accesso in base al tipo di autenticazione, è ne
       else echo ‘Autenticazione debole non permessa’;
 ```
 
-## Utilizzo del certificato digitale
-La libreria dispone già di un certificato valido, tuttavia se si ha a disposizione un proprio certificato digitale è possibile configurarne l'utilizzo nel seguente modo:
+## Autori e storia del progetto
+Libreria creata come lavoro personale da Andrea Vallorani (andrea.vallorani@gmail.com)
 
-```php
-      $cohesion->setCertificate('cohesion2.crt.pem','cohesion2.key.pem');
-```
-
-Per creare i file .pem avendo a disposizione il certificato con estensione .p12, utilizzare la libreria openssl:
-
-```shell
-      openssl pkcs12 -in path.p12 -out newfile.crt.pem -clcerts -nokeys
-      openssl pkcs12 -in path.p12 -out newfile.key.pem –nodes -nocerts
-```
+- 2015-06-16 pubblicata ver. 2.1.0 https://github.com/andreaval/Cohesion2PHPLibrary/releases/tag/2.1.0
+- 2015-06-31 pubblicata ver. 2.1.1 https://github.com/andreaval/Cohesion2PHPLibrary/releases/tag/2.1.1
+- 2015-10-13 pubblicata ver. 2.1.1 https://github.com/andreaval/Cohesion2PHPLibrary/releases/tag/2.1.2
+- 2018-04-25 pubblicata ver. 2.2.0 https://github.com/andreaval/Cohesion2PHPLibrary/releases/tag/2.2.0
+- 2023-03-20 integrate modifiche di Saverio Delpriori (https://github.com/xavbeta) dal fork (https://github.com/regione-marche/Cohesion2PHPLibrary)
+- 2023-03-27 pubblicata ver. 3.0.0 https://github.com/andreaval/Cohesion2PHPLibrary/releases/tag/3.0.0
