@@ -52,12 +52,7 @@ class Cohesion2{
     
     function __construct(){
         //controllo se la sessione è stata avviata
-        if(version_compare(PHP_VERSION,'5.4.0')>=0){
-            if(session_status() == PHP_SESSION_NONE) session_start();
-    	}
-        else{
-            if(session_id() == '') session_start();
-        }
+        if(session_status() == PHP_SESSION_NONE) session_start();
         if($this->isAuth()){
             //Utente già autenticato, ripristino sessione
             $obj = unserialize($_SESSION[self::SESSION_NAME]);
