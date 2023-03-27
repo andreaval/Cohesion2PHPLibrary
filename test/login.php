@@ -2,15 +2,16 @@
 ini_set('display_errors',1);
 error_reporting(E_ALL);
 require_once '../cohesion2/Cohesion2.php';
+use andreaval\Cohesion2\Cohesion2;
+use andreaval\Cohesion2\Cohesion2Exception;
 try{
-    $cohesion=new Cohesion2;
-    //$cohesion->setAuthRestriction('1,2');
+    $cohesion = new Cohesion2;
+    $cohesion->setAuthRestriction('1,2');
     //$cohesion->useSSO(false);
-    //$cohesion->setCertificate('cert/cohesion2.crt.pem','cert/cohesion2.key.pem');
     $cohesion->auth();
 }
-catch(Exception $e){
-    die($e->getMessage());
+catch(Cohesion2Exception $e){
+    die($e->getTraceAsString());
 }
 
 if($cohesion->isAuth()){
