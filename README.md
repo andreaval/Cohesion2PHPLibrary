@@ -149,7 +149,7 @@ Libreria creata come lavoro personale da Andrea Vallorani (andrea.vallorani@gmai
 
 - 2015-06-16 pubblicata ver. 2.1.0 https://github.com/andreaval/Cohesion2PHPLibrary/releases/tag/2.1.0
 - 2015-06-31 pubblicata ver. 2.1.1 https://github.com/andreaval/Cohesion2PHPLibrary/releases/tag/2.1.1
-- 2015-10-13 pubblicata ver. 2.1.1 https://github.com/andreaval/Cohesion2PHPLibrary/releases/tag/2.1.2
+- 2015-10-13 pubblicata ver. 2.1.3 https://github.com/andreaval/Cohesion2PHPLibrary/releases/tag/2.1.2
 - 2018-04-25 pubblicata ver. 2.2.0 https://github.com/andreaval/Cohesion2PHPLibrary/releases/tag/2.2.0
-- 2023-03-20 integrate modifiche di Saverio Delpriori (https://github.com/xavbeta) dal fork (https://github.com/regione-marche/Cohesion2PHPLibrary)
+- 2023-03-20 integrate modifiche di @xavbeta dal fork https://github.com/regione-marche/Cohesion2PHPLibrary)
 - 2023-03-27 pubblicata ver. 3.0.0 https://github.com/andreaval/Cohesion2PHPLibrary/releases/tag/3.0.0
