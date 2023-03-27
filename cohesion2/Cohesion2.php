@@ -1,8 +1,8 @@
 <?php
 /**
  * Classe per la gestione del SSO di Cohesion2
- * @version 2.2.0 20/04/18 17.30
- * @license MIT License <http://opensource.org/licenses/MIT>
+ * @version 3.0.0 27/03/2023 18.16
+ * @license MIT License <https://github.com/andreaval/Cohesion2PHPLibrary/blob/master/LICENSE>
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
  * @link http://cohesion.regione.marche.it/cohesioninformativo/
  */
