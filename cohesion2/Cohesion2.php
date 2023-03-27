@@ -14,7 +14,6 @@ class Cohesion2{
     const COHESION2_WEB = 'https://cohesion2.regione.marche.it/SSO/webCheckSessionSSO.aspx';
     const COHESION2_SAML20_CHECK = 'https://cohesion2.regione.marche.it/SPManager/WAYF.aspx?auth=';
     const COHESION2_SAML20_WEB = 'https://cohesion2.regione.marche.it/SPManager/webCheckSessionSSO.aspx';
-    const SESSION_NAME = 'cohesion2';
     const EIDAS_FLAG = 'eidas=1';
     const PURPOSE_FLAG = 'purpose=';
     
