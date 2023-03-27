@@ -185,14 +185,17 @@ class Cohesion2{
     public function logout(){
         if($this->isAuth()){
             unset($_SESSION[self::SESSION_NAME]);
-            $data = array('Operation'=>'LogoutSito','IdSessioneSSO'=>$this->id_sso,'IdSessioneASPNET'=>$this->id_aspnet);
-            $context  = stream_context_create(array(
-                'http' => array(
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data),
-                ),
-            ));
+            $data = ['Operation'=>'LogoutSito','IdSessioneSSO'=>$this->id_sso,'IdSessioneASPNET'=>$this->id_aspnet];
+            $context  = stream_context_create([
+                'http' => [
+                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                    'method'  => 'POST',
+                    'content' => http_build_query($data),
+                ],
+                'ssl' => [
+                    'ciphers' => 'DEFAULT:!DH'
+                ]
+            ]);
             file_get_contents(self::COHESION2_WEB,false,$context);
         }
     }
@@ -262,6 +265,9 @@ class Cohesion2{
                 'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
                 'method'  => 'POST',
                 'content' => http_build_query($data),
+            ],
+            'ssl' => [
+                'ciphers' => 'DEFAULT:!DH'
             ]
         ]);
         
