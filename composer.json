@@ -1,8 +1,8 @@
 {
     "name": "andreaval/cohesion2-library",
-    "description": "Libreria per l'autenticazione al sistema di SSO Cohesion2 della Regione Marche",
+    "description": "Libreria PHP per l'autenticazione al sistema di SSO Cohesion2 della Regione Marche",
     "type": "library",
-    "keywords": ["php", "Cohesion2", "Regione Marche", "SSO", "Single Sign-On", "SAML 2.0", "SPID"],
+    "keywords": ["php", "Cohesion2", "Regione Marche", "SSO", "Single Sign-On", "SAML 2.0", "SPID", "eIDAS"],
     "homepage": "https://github.com/andreaval/Cohesion2PHPLibrary",
     "license": "MIT",
     "authors": [
@@ -16,11 +16,9 @@
         "source": "https://github.com/andreaval/Cohesion2PHPLibrary"
     },
     "require": {
-        "php": ">=5.0.0"
+        "php": ">=5.4.0"
     },
     "autoload": {
-        "classmap": [
-            "cohesion2/Cohesion2.php"
-        ]
+        "psr-0": { "andreaval\\Cohesion2\\": "cohesion2/" }
     }
 }
