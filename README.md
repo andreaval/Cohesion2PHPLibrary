@@ -49,8 +49,8 @@ E' possibile indicare a Cohesion di utilizzare lo standard SAML 2.0 tramite l'ap
 ```php
       $cohesion = new Cohesion2;
       $cohesion->useSAML20(true);
-      $cohesion->enableEIDASLogin(); //se si intende abilitare il login eIDAS
-      $cohesion->enableSPIDProLogin(array("PF", "PG", "LP")); //se si intende abilitare il login SPID Professionale
+      $cohesion->enableEIDASLogin(); //per abilitare il login eIDAS
+      $cohesion->enableSPIDProLogin(['PF','PG','LP']); //per abilitare il login SPID Professionale
       $cohesion->auth();
 ```
 
