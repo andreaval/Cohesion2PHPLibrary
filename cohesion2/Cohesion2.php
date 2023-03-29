@@ -2,7 +2,7 @@
 namespace andreaval\Cohesion2;
 /**
  * Classe per la gestione del SSO di Cohesion2
- * @version 3.0.1 29/03/2023 17.58
+ * @version 3.0.1 29/03/2023 22.10
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
  * @license MIT License <https://github.com/andreaval/Cohesion2PHPLibrary/blob/master/LICENSE>
  * @link http://cohesion.regione.marche.it/cohesioninformativo/
@@ -163,19 +163,9 @@ class Cohesion2{
      */
     public function logout(){
         if($this->isAuth()){
-            unset($_SESSION[$this->session_name]);
             $data = ['Operation'=>'LogoutSito','IdSessioneSSO'=>$this->id_sso,'IdSessioneASPNET'=>$this->id_aspnet];
-            $context  = stream_context_create([
-                'http' => [
-                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                    'method'  => 'POST',
-                    'content' => http_build_query($data),
-                ],
-                'ssl' => [
-                    'ciphers' => 'DEFAULT:!DH'
-                ]
-            ]);
-            file_get_contents(self::COHESION2_WEB,false,$context);
+            $this->httpPost(self::COHESION2_WEB,$data);
+            unset($_SESSION[$this->session_name]);
         }
     }
     
@@ -238,24 +228,9 @@ class Cohesion2{
         if($esito!='OK') return false;
         
         //file_put_contents('log.txt',"Recupero profilo tramite pagina web\n",FILE_APPEND);
-        $data = ['Operation'=>'GetCredential','IdSessioneSSO'=>$this->id_sso,'IdSessioneASPNET'=>$this->id_aspnet];
-        $context  = stream_context_create([
-            'http' => [
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data),
-            ],
-            'ssl' => [
-                'ciphers' => 'DEFAULT:!DH'
-            ]
-        ]);
-        
         $url = $this->saml20 ? self::COHESION2_SAML20_WEB : self::COHESION2_WEB;
-        $result = @file_get_contents($url,false,$context);
-        if($result===false){
-            $error = error_get_last();
-            throw new Cohesion2Exception($error['message']);
-        }
+        $data = ['Operation'=>'GetCredential','IdSessioneSSO'=>$this->id_sso,'IdSessioneASPNET'=>$this->id_aspnet];
+        $result = $this->httpPost($url,$data);
         $domXML->loadXML($result);
         //file_put_contents('log.txt',var_export($result,1)."\n",FILE_APPEND);
         $profilo = simplexml_import_dom($domXML);
@@ -270,6 +245,29 @@ class Cohesion2{
             return true;
         }
         else throw new Cohesion2Exception('Profilo utente non trovato nella risposta fornita da Cohesion2');
+    }
+    
+    private function httpPost($url,$data){
+        $data = http_build_query($data);
+        $context  = stream_context_create([
+            'http' => [
+                'header' => "Content-type: application/x-www-form-urlencoded\r\nContent-Length:".strlen($data)."\r\n",
+                'method' => 'POST',
+                'protocol_version' => '1.2',
+                'content' => $data
+            ],
+            'ssl' => [
+                'ciphers' => 'DEFAULT:!DH',
+                'verify_peer' => false,
+                'verify_peer_name' => false 
+            ]
+        ]);
+        $result = @file_get_contents($url,false,$context);
+        if($result===false){
+            $error = error_get_last();
+            throw new Cohesion2Exception($error['message']);
+        }
+        return $result;
     }
 }
 
