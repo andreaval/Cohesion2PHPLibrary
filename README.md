@@ -26,11 +26,13 @@ Per disabilitare, eventualmente il SSO, e forzare quindi sempre all’autenticaz
 
 ```php
       require_once 'cohesion2/Cohesion2.php';
+      use andreaval\Cohesion2\Cohesion2;
+      use andreaval\Cohesion2\Cohesion2Exception;
       try{
           $cohesion = new Cohesion2;
           $cohesion->auth();
       }
-      catch(Exception $e){
+      catch(Cohesion2Exception $e){
           die($e->getMessage());
       }
       if($cohesion->isAuth()){
@@ -47,8 +49,8 @@ E' possibile indicare a Cohesion di utilizzare lo standard SAML 2.0 tramite l'ap
 ```php
       $cohesion = new Cohesion2;
       $cohesion->useSAML20(true);
-      $cohesion->enableEIDASLogin(); //se si intende abilitare il login eIDAS
-      $cohesion->enableSPIDProLogin(array("PF", "PG", "LP")); //se si intende abilitare il login SPID Professionale
+      $cohesion->enableEIDASLogin(); //per abilitare il login eIDAS
+      $cohesion->enableSPIDProLogin(['PF','PG','LP']); //per abilitare il login SPID Professionale
       $cohesion->auth();
 ```
 
@@ -139,9 +141,9 @@ N.B. Se si intende limitare l’accesso in base al tipo di autenticazione, è ne
 
 ```php
       if($cohesion->profile['tipo_autenticazione']!='PW'){
-          echo ‘OK puoi usare il servizio’;
+          echo 'OK puoi usare il servizio';
       }
-      else echo ‘Autenticazione debole non permessa’;
+      else echo 'Autenticazione debole non permessa';
 ```
 
 ## Autori e storia del progetto
