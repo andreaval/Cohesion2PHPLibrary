@@ -73,7 +73,7 @@ Tramite la proprietà  *profile*  è possibile accedere ai dati del profilo uten
 I valori ritornati dal sistema di autenticazione vengono istanziati come chiavi dell’array profile (non tutti i campi possono risultare valorizzati).
 
 Cohesion2 restituisce i seguenti campi:
-titolo, nome, cognome, sesso, login, codice_fiscale, spidCode, telefono, localita_nascita, provincia_nascita, cap_nascita, regione_nascita,
+titolo, nome, cognome, sesso, login, codice_fiscale, telefono, localita_nascita, provincia_nascita, cap_nascita, regione_nascita,
 data_nascita, nazione_nascita, gruppo, ruolo, email, email_certificata, telefono_ufficio, fax_ufficio, numero_cellulare, 
 indirizzo_residenza, localita_residenza, provincia_residenza, cap_residenza, regione_residenza, nazione_residenza, professione, 
 settore_azienda, profilo_familiare, tipo_autenticazione (PW , PIN , CF).
