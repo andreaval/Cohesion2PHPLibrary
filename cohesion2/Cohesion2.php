@@ -3,6 +3,7 @@ namespace andreaval\Cohesion2;
 /**
  * Classe per la gestione del SSO di Cohesion2
  * @version 3.0.1 29/03/2023 22.56
+ * @requires PHP 5.4
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
  * @license MIT License <https://github.com/andreaval/Cohesion2PHPLibrary/blob/master/LICENSE>
  * @link http://cohesion.regione.marche.it/cohesioninformativo/
@@ -131,7 +132,8 @@ class Cohesion2{
      * @param string[] $SPIDProPurposes inserire un array con i purpose richiesti. 
      *                 Default: PF - SPID per Persone Fisiche ad Uso Professionale.
      *                 I possibili valori sono: LP, PG, PF, PX Così come indicato 
-     *                 nell'avviso SPID 18 v2: https://www.agid.gov.it/sites/default/files/repository_files/spid-avviso-n18_v.2-_autenticazione_persona_giuridica_o_uso_professionale_per_la_persona_giuridica.pdf
+     *                 nell'avviso SPID 18 v2
+     * @link https://www.agid.gov.it/sites/default/files/repository_files/spid-avviso-n18_v.2-_autenticazione_persona_giuridica_o_uso_professionale_per_la_persona_giuridica.pdf
      * @return Cohesion2
      */
     public function enableSPIDProLogin($SPIDProPurposes=['PF']){
@@ -143,7 +145,7 @@ class Cohesion2{
     /**
      * Autentica l'utente nel sistema
      * @return void
-     * @throws Exception Invocata eccezione in caso di errore
+     * @throws Cohesion2Exception Invocata eccezione in caso di errore
      */
     public function auth(){
         //file_put_contents('log.txt',__METHOD__."\n",FILE_APPEND);
