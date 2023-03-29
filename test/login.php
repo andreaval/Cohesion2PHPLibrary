@@ -11,7 +11,7 @@ try{
     $cohesion->auth();
 }
 catch(Cohesion2Exception $e){
-    die($e->getTraceAsString());
+    die($e->getMessage().'<br>'.$e->getTraceAsString());
 }
 
 if($cohesion->isAuth()){

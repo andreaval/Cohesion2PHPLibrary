@@ -10,7 +10,7 @@ try{
     //$cohesion->logoutLocal();
 }
 catch(Cohesion2Exception $e){
-    die($e->getTraceAsString());
+    die($e->getMessage().'<br>'.$e->getTraceAsString());
 }
 
 echo 'Logout OK';
