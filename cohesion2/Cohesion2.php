@@ -2,7 +2,7 @@
 namespace andreaval\Cohesion2;
 /**
  * Classe per la gestione del SSO di Cohesion2
- * @version 3.0.1 29/03/2023 22.10
+ * @version 3.0.1 29/03/2023 22.56
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
  * @license MIT License <https://github.com/andreaval/Cohesion2PHPLibrary/blob/master/LICENSE>
  * @link http://cohesion.regione.marche.it/cohesioninformativo/
@@ -225,7 +225,8 @@ class Cohesion2{
         $this->id_aspnet = $domXML->getElementsByTagName('id_sessione_aspnet_sso')->item(0)->nodeValue;
         $this->username = $domXML->getElementsByTagName('user')->item(0)->nodeValue;
         $esito = $domXML->getElementsByTagName('esito_auth_sso')->item(0)->nodeValue;
-        if($esito!='OK') return false;
+        if($esito!='OK' || $this->id_sso=='' || $this->id_aspnet=='') 
+            throw new Cohesion2Exception("Errore in fase di autenticazione ($esito,$this->id_sso,$this->id_aspnet)");
         
         //file_put_contents('log.txt',"Recupero profilo tramite pagina web\n",FILE_APPEND);
         $url = $this->saml20 ? self::COHESION2_SAML20_WEB : self::COHESION2_WEB;
@@ -242,7 +243,6 @@ class Cohesion2{
             }
             $this->profile = $resp;
             $_SESSION[$this->session_name] = serialize($this);
-            return true;
         }
         else throw new Cohesion2Exception('Profilo utente non trovato nella risposta fornita da Cohesion2');
     }
