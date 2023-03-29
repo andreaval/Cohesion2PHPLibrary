@@ -2,7 +2,7 @@
 namespace andreaval\Cohesion2;
 /**
  * Classe per la gestione del SSO di Cohesion2
- * @version 3.0.1 27/03/2023 23.44
+ * @version 3.0.1 29/03/2023 17.58
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
  * @license MIT License <https://github.com/andreaval/Cohesion2PHPLibrary/blob/master/LICENSE>
  * @link http://cohesion.regione.marche.it/cohesioninformativo/
@@ -175,7 +175,7 @@ class Cohesion2{
                     'ciphers' => 'DEFAULT:!DH'
                 ]
             ]);
-            file_get_contents($this->saml20 ? self::COHESION2_SAML20_WEB : self::COHESION2_WEB,false,$context);
+            file_get_contents(self::COHESION2_WEB,false,$context);
         }
     }
     
@@ -250,12 +250,17 @@ class Cohesion2{
             ]
         ]);
         
-        $result = file_get_contents($this->saml20 ? self::COHESION2_SAML20_WEB : self::COHESION2_WEB,false,$context);
+        $url = $this->saml20 ? self::COHESION2_SAML20_WEB : self::COHESION2_WEB;
+        $result = @file_get_contents($url,false,$context);
+        if($result===false){
+            $error = error_get_last();
+            throw new Cohesion2Exception($error['message']);
+        }
         $domXML->loadXML($result);
         //file_put_contents('log.txt',var_export($result,1)."\n",FILE_APPEND);
         $profilo = simplexml_import_dom($domXML);
         $base = current($profilo->xpath('//base'));
-        if($base->login){
+        if(is_object($base) && $base->login){
             $resp = [];
             foreach($base->children() as $node){
                 $resp[$node->getName()] = (string)$node;
@@ -264,7 +269,7 @@ class Cohesion2{
             $_SESSION[$this->session_name] = serialize($this);
             return true;
         }
-        else throw new Cohesion2Exception('Impossibile recuperare il profilo utente da Cohesion2');
+        else throw new Cohesion2Exception('Profilo utente non trovato nella risposta fornita da Cohesion2');
     }
 }
 
