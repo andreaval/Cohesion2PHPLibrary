@@ -2,7 +2,7 @@
 namespace andreaval\Cohesion2;
 /**
  * Classe per la gestione del SSO di Cohesion2
- * @version 3.0.1 29/03/2023 22.56
+ * @version 3.0.1 30/03/2023 17.34
  * @requires PHP 5.4
  * @author Andrea Vallorani <andrea.vallorani@gmail.com>
  * @license MIT License <https://github.com/andreaval/Cohesion2PHPLibrary/blob/master/LICENSE>
@@ -253,7 +253,7 @@ class Cohesion2{
         $data = http_build_query($data);
         $context  = stream_context_create([
             'http' => [
-                'header' => "Content-type: application/x-www-form-urlencoded\r\nContent-Length:".strlen($data)."\r\n",
+                'header' => "Content-type: application/x-www-form-urlencoded\r\nContent-Length: ".strlen($data)."\r\nConnection: close\r\n",
                 'method' => 'POST',
                 'protocol_version' => '1.2',
                 'content' => $data
